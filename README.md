@@ -70,3 +70,47 @@ public void doFilter(HttpServletRequest request, HttpServletResponse response, F
 	chain.doFilter(request, response);
 }
 ```
+
+# 实现效果
+```Bash
+d@MyServer:~/tomcat/bin$ curl localhost/Spring-filter/res/kasumi.jpg -IL
+HTTP/1.1 200
+Server: Fast Tomcat
+Content-Disposition: attachment; filename="kasumi.jpg"; filename*=UTF-8''kasumi.jpg #文件描述
+Accept-Ranges: bytes
+ETag: W/"79027-1568247848000"
+Last-Modified: Thu, 12 Sep 2019 00:24:08 GMT
+Content-Type: image/jpeg
+Content-Length: 79027
+Date: Fri, 13 Sep 2019 13:32:37 GMT
+
+d@MyServer:~/tomcat/bin$ wget localhost/Spring-filter/res/kasumi.jpg
+--2019-09-13 09:32:47--  http://localhost/Spring-filter/res/kasumi.jpg
+Resolving localhost (localhost)... ::1, 127.0.0.1
+Connecting to localhost (localhost)|::1|:80... connected.
+HTTP request sent, awaiting response... 444
+2019-09-13 09:32:47 ERROR 444: (no description). #防盗链
+
+d@MyServer:~/tomcat/bin$ wget localhost/Spring-filter/res/kasumi.jpg --header="Referer: http://localhost/"
+--2019-09-13 09:35:32--  http://localhost/Spring-filter/res/kasumi.jpg
+Resolving localhost (localhost)... ::1, 127.0.0.1
+Connecting to localhost (localhost)|::1|:80... connected.
+HTTP request sent, awaiting response... 200
+Length: 79027 (77K) [image/jpeg]
+Saving to: ‘kasumi.jpg’
+
+kasumi.jpg                         100%[=============================================================>]  77.17K  --.-KB/s    in 0.004s
+
+2019-09-13 09:35:32 (20.5 MB/s) - ‘kasumi.jpg’ saved [79027/79027]
+
+d@MyServer:~/tomcat/bin$ curl localhost/Spring-filter/getfile/2 -IL
+HTTP/1.1 200
+Server: Fast Tomcat
+Content-Disposition: attachment; filename="%E6%9C%89%E6%9D%91%E6%9E%B6%E7%BA%AF.jpg"; filename*=UTF-8''%E6%9C%89%E6%9D%91%E6%9E%B6%E7%BA%AF.jpg
+Accept-Ranges: bytes
+ETag: W/"79027-1568247848000"
+Last-Modified: Thu, 12 Sep 2019 00:24:08 GMT
+Content-Type: image/jpeg
+Content-Length: 79027
+Date: Fri, 13 Sep 2019 13:36:38 GMT #包装request实现隐藏文件
+```
